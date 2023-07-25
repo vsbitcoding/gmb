@@ -136,8 +136,8 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Add your API credentials here (replace with actual values)
-GMB_CLIENT_ID = 'your_client_id'
-GMB_CLIENT_SECRET = 'your_client_secret'
+GMB_CLIENT_ID = '1019557246053-dnftdv27j1hmfsiafpfov0k4tb63i1g4.apps.googleusercontent.com'
+GMB_CLIENT_SECRET = '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'
 GMB_REDIRECT_URI = 'your_redirect_uri'
 GMB_ACCESS_TOKEN = 'your_access_token'
 GMB_REFRESH_TOKEN = 'your_refresh_token'
