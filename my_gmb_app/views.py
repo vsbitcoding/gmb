@@ -3,13 +3,15 @@ import requests
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from .gmb_client import get_gmb_service
+from rest_framework.response import Response
+from rest_framework import status
 
 class ListLocationsView(APIView):
     def get(self, request, *args, **kwargs):
         service = get_gmb_service()
         locations = service.accounts().locations().list(parent='accounts/*').execute()
         return JsonResponse(locations)
-
+    
 class LocationReviewsView(APIView):
     def get(self, request, location_id, *args, **kwargs):
         service = get_gmb_service()
@@ -18,21 +20,43 @@ class LocationReviewsView(APIView):
 
 class UpdateLocationView(APIView):
     def patch(self, request, location_id, *args, **kwargs):
-        service = get_gmb_service()
-        new_location_data = {
-            # ...
-        }
-        response = service.accounts().locations().patch(name=f'accounts/*/locations/{location_id}', body=new_location_data).execute()
-        return JsonResponse(response)
+        try:
+            service = get_gmb_service()
+            
+            # Retrieve the existing location data from the GMB API
+            existing_location = service.accounts().locations().get(name=f'accounts/*/locations/{location_id}').execute()
 
+            # Get the updated location data from the request data
+            updated_location_data = request.data
+
+            # Merge the existing data with the updated data
+            new_location_data = {**existing_location, **updated_location_data}
+
+            # Perform the update by sending a PATCH request to the GMB API
+            response = service.accounts().locations().patch(name=f'accounts/*/locations/{location_id}', body=new_location_data).execute()
+
+            return JsonResponse(response)
+
+        except Exception as e:
+            error_message = str(e)
+            return JsonResponse({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+        
 class CreateLocationView(APIView):
     def post(self, request, *args, **kwargs):
-        service = get_gmb_service()
-        new_location_data = {
-            # ...
-        }
-        response = service.accounts().locations().create(parent='accounts/*', body=new_location_data).execute()
-        return JsonResponse(response)
+        try:
+            service = get_gmb_service()
+
+            # Get the new location data from the request data
+            new_location_data = request.data
+
+            # Perform the creation by sending a POST request to the GMB API
+            response = service.accounts().locations().create(parent='accounts/*', body=new_location_data).execute()
+
+            return JsonResponse(response)
+
+        except Exception as e:
+            error_message = str(e)
+            return JsonResponse({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
 
 class LocationPhotosView(APIView):
     def get(self, request, location_id, *args, **kwargs):
@@ -117,12 +141,23 @@ class LocationPostsView(APIView):
 
 class CreateLocationPostView(APIView):
     def post(self, request, location_id, *args, **kwargs):
-        service = get_gmb_service()
-        new_post_data = {
-            # ...
-        }
-        response = service.accounts().locations().localPosts().create(parent=f'accounts/*/locations/{location_id}', body=new_post_data).execute()
-        return JsonResponse(response)
+        try:
+            service = get_gmb_service()
+
+            # Get the new post data from the request data
+            new_post_data = request.data
+
+            # Perform the creation by sending a POST request to the GMB API
+            response = service.accounts().locations().localPosts().create(
+                parent=f'accounts/*/locations/{location_id}',
+                body=new_post_data
+            ).execute()
+
+            return JsonResponse(response)
+
+        except Exception as e:
+            error_message = str(e)
+            return JsonResponse({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
 
 class LocationInsightsTimeSeriesView(APIView):
     def get(self, request, location_id, *args, **kwargs):
